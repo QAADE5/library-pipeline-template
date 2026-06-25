@@ -4,10 +4,10 @@ TODO: Complete these functions for the library project.
 """
 
 import json
-import logging
-from pathlib import Path
 
+import logging
 import pandas as pd
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,32 +15,32 @@ logger = logging.getLogger(__name__)
 
 def load_csv(filepath):
     """Load CSV file with error handling.
-    
+
     Args:
         filepath: Path to CSV file
-        
+
     Returns:
         DataFrame with loaded data
-        
+
     TODO: Add error handling and logging
     """
-    # TODO: Implement this function
-    pass
+    return pd.read_csv(filepath)
 
 
 def load_json(filepath):
     """Load JSON file and flatten structure.
-    
+
     Args:
         filepath: Path to JSON file
-        
+
     Returns:
         DataFrame with flattened data
-        
+
     TODO: Implement JSON loading and flattening
     """
-    # TODO: Implement this function
-    pass
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+    return pd.json_normalize(data)
 
 
 def load_excel(filepath, sheet_name=0, **kwargs):
@@ -48,7 +48,7 @@ def load_excel(filepath, sheet_name=0, **kwargs):
 
     Args:
         filepath (str | Path): Path to Excel file
-        sheet_name (str | int | list[str | int] | None): Sheet(s) to read, same as pandas.read_excel()
+        sheet_name (str|int|list[str|int]|None): Sheets to read
         **kwargs: Additional arguments for pd.read_excel()
 
     Returns:
@@ -77,7 +77,8 @@ def load_excel(filepath, sheet_name=0, **kwargs):
 
         if isinstance(df, dict):
             total_rows = sum(len(v) for v in df.values())
-            logger.info(f"Successfully loaded {len(df)} sheet(s), total {total_rows} rows from {filepath}")
+            line = f"Successfully loaded {len(df)} sheets, total {total_rows} rows from {filepath}"
+            logger.info(line)
         else:
             logger.info(f"Successfully loaded {len(df)} rows from {filepath}")
 

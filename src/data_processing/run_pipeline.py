@@ -27,7 +27,7 @@ from data_processing.ingestion import load_csv, load_json, load_excel
 from data_processing.cleaning import (
     remove_duplicates,
     handle_missing_values,
-    standardize_dates,
+    # standardize_dates,
 )
 from data_processing.validation import validate_isbn
 
@@ -61,7 +61,11 @@ def print_dataframe_info(df, name):
     print(f"  - Rows: {len(df):,}")
     print(f"  - Columns: {len(df.columns)}")
     print(f"  - Missing values: {df.isnull().sum().sum():,}")
-    print(f"  - Duplicates: {df.duplicated().sum():,}")
+    try:
+        dupes = df.duplicated().sum()
+    except TypeError:
+        dupes = 'N/A'
+    print(f"  - Duplicates: {dupes}")
 
 
 def save_to_silver(df, filename):
@@ -297,6 +301,6 @@ def run_pipeline():
 
 if __name__ == "__main__":
     """
-    This runs when you execute: python -m src.data_processing.run_pipeline
+    This runs when you execute: python -m data_processing.run_pipeline
     """
     results = run_pipeline()
