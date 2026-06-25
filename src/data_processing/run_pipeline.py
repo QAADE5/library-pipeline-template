@@ -13,7 +13,8 @@ Date: [Today's Date]
 Module: DE5 Module 5 - Product Development
 
 Run this from the command line as follows:
-> python -m src.data_processing.run_pipeline
+> pip install -e .
+> python -m data_processing.run_pipeline
 """
 
 import re
@@ -22,13 +23,13 @@ from pathlib import Path
 from datetime import datetime
 
 # Import our custom functions
-from src.data_processing.ingestion import load_csv, load_json, load_excel
-from src.data_processing.cleaning import (
+from data_processing.ingestion import load_csv, load_json, load_excel
+from data_processing.cleaning import (
     remove_duplicates,
     handle_missing_values,
-    standardize_dates
+    standardize_dates,
 )
-from src.data_processing.validation import validate_isbn
+from data_processing.validation import validate_isbn
 
 
 # ============================================
