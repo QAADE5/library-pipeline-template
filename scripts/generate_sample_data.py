@@ -3,7 +3,7 @@ Generate sample library data with realistic quality issues.
 
 This creates 4 files for the library pipeline project:
 - circulation_data.csv (with duplicates, missing values, date format issues)
-- events_data.json (nested structure, inconsistent naming)
+- events_data.json (flat array of events)
 - feedback.txt (unstructured text)
 - catalogue.xlsx (messy Excel with formatting issues)
 """
@@ -86,12 +86,12 @@ def generate_circulation_data(n):
     return df
 
 # ============================================
-# 2. EVENTS DATA (JSON with nested structure)
+# 2. EVENTS DATA (flat JSON array)
 # ============================================
 
 
 def generate_events_data(n):
-    """Generate events data as nested JSON."""
+    """Generate events data as a flat JSON array."""
 
     event_types = [
         'Children\'s Story Hour',
@@ -130,8 +130,7 @@ def generate_events_data(n):
 
         events.append(event)
 
-    # Wrap in structure (forces learners to handle nesting)
-    return {'events': events, 'generated_at': datetime.now().isoformat()}
+    return events
 
 # ============================================
 # 3. FEEDBACK DATA (Unstructured text)
@@ -290,8 +289,7 @@ def generate_all_sample_data(output_dir='data'):
     events = generate_events_data(EVENTS)
     with open(f'{output_dir}/events_data.json', 'w') as f:
         json.dump(events, f, indent=2)
-    print(f"    ✓ Created: {len(events['events'])} events")
-    print("    - Nested structure (requires flattening)")
+    print(f"    ✓ Created: {len(events)} events")
 
     # 3. Feedback text
     print("  - Generating feedback.txt...")
@@ -325,7 +323,7 @@ def generate_all_sample_data(output_dir='data'):
     print("\n✅ All sample data generated successfully!")
     print(f"\nFiles created in '{output_dir}/':")
     print("  - circulation_data.csv (messy CSV)")
-    print("  - events_data.json (nested JSON)")
+    print("  - events_data.json (flat JSON array)")
     print("  - feedback.txt (unstructured text)")
     print("  - catalogue.xlsx (messy Excel)")
 
@@ -341,9 +339,8 @@ def generate_all_sample_data(output_dir='data'):
     print(f"  ~{int(CIRCULATION*0.03)} whitespace issues in branch_id (~3%)")
 
     print("\nevents_data.json:")
-    print("  ⚠️  Nested structure (needs flattening)")
     print("  ⚠️  Branch names don't match branch_id format")
-    print(f"  ~{int(FEEDBACK*0.10)} missing feedback_scores (~10%)")
+    print(f"  ~{int(EVENTS*0.10)} missing feedback_scores (~10%)")
 
     print("\nfeedback.txt:")
     print("  ⚠️  Completely unstructured")
