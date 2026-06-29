@@ -4,6 +4,9 @@ site_name: SITE NAME
 # Navigation menu
 nav:
   - Overview: index.md
+  - Architecture:
+    - Pipeline Design: architecture/design-pipeline.md
+    - ADR: architecture/adr.md
 
 # Theme
 theme:
