@@ -1,4 +1,5 @@
 # For this project:
+notebooks/sandbox.ipynb
 
 # Data files - just regenerate with script
 data/*.csv
