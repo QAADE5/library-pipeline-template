@@ -27,7 +27,7 @@ from data_processing.ingestion import load_csv, load_json, load_excel
 from data_processing.cleaning import (
     remove_duplicates,
     handle_missing_values,
-    # standardize_dates,
+    standardize_dates,
 )
 from data_processing.validation import validate_isbn
 
@@ -79,7 +79,7 @@ def save_to_silver(df, filename):
 # PIPELINE STAGES
 # ============================================
 
-def process_circulation_data():
+def process_circulation_data(warnings):
     """
     Process circulation data (borrowing transactions).
 
@@ -93,31 +93,42 @@ def process_circulation_data():
     print_section_header("Processing Circulation Data")
 
     # Step 1: Load raw data
-    print("\n[1/4] Loading raw data...")
+    print("\n[1/5] Loading raw data...")
     df = load_csv('data/circulation_data.csv')
     print_dataframe_info(df, "Raw data")
 
     # Step 2: Remove duplicates
-    print("\n[2/4] Removing duplicates...")
+    print("\n[2/5] Removing duplicates...")
+    input_dupes = df.duplicated(subset=['transaction_id']).sum()
     df_clean = remove_duplicates(df, subset=['transaction_id'])
     rows_removed = len(df) - len(df_clean)
     print(f"  - Removed {rows_removed:,} duplicate rows")
+    if input_dupes > 0 and df_clean.duplicated(subset=['transaction_id']).sum() == input_dupes:
+        warnings.append(f"Circulation: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?")
 
     # Step 3: Handle missing values
-    print("\n[3/4] Handling missing values...")
+    print("\n[3/5] Handling missing values...")
+    input_missing = df_clean.isnull().sum().sum()
     df_clean = handle_missing_values(df_clean, strategy='drop')
-    print("  - Dropped rows with missing values")
+    output_missing = df_clean.isnull().sum().sum()
+    print(f"  - Dropped rows with missing values")
+    if input_missing > 0 and output_missing == input_missing:
+        warnings.append(f"Circulation: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?")
 
-    # Step 4: Save cleaned data
-    print("\n[4/4] Saving cleaned data...")
+    # Step 4: Standardize dates
+    print("\n[4/5] Standardizing dates...")
+    df_clean = standardize_dates(df_clean, date_columns=['checkout_date', 'return_date'])
+
+    # Step 5: Save cleaned data
+    print("\n[5/5] Saving cleaned data...")
     filepath = save_to_silver(df_clean, 'circulation_clean.csv')
-    print(f"  ✓ Saved to: {filepath}")
+    print(f"  [OK] Saved to: {filepath}")
     print_dataframe_info(df_clean, "Cleaned data")
 
     return df_clean
 
 
-def process_events_data():
+def process_events_data(warnings):
     """
     Process events data (library events from JSON).
 
@@ -136,19 +147,23 @@ def process_events_data():
 
     # Step 2: Handle missing values
     print("\n[2/3] Handling missing values...")
+    input_missing = df.isnull().sum().sum()
     df_clean = handle_missing_values(df, strategy='drop')
+    output_missing = df_clean.isnull().sum().sum()
+    if input_missing > 0 and output_missing == input_missing:
+        warnings.append(f"Events: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?")
 
     # Step 3: Save cleaned data
     print("\n[3/3] Saving cleaned data...")
     filepath = save_to_silver(df_clean, 'events_clean.csv')
-    print(f"  ✓ Saved to: {filepath}")
+    print(f"  [OK] Saved to: {filepath}")
 
     print_dataframe_info(df_clean, "Cleaned data")
 
     return df_clean
 
 
-def process_catalogue_data():
+def process_catalogue_data(warnings):
     """
     Process catalogue data (book catalogue from Excel).
 
@@ -168,9 +183,12 @@ def process_catalogue_data():
 
     # Step 2: Remove duplicates
     print("\n[2/4] Removing duplicates...")
+    input_dupes = df.duplicated(subset=['ISBN']).sum()
     df_clean = remove_duplicates(df, subset=['ISBN'])
     rows_removed = len(df) - len(df_clean)
     print(f"  - Removed {rows_removed:,} duplicate rows")
+    if input_dupes > 0 and df_clean.duplicated(subset=['ISBN']).sum() == input_dupes:
+        warnings.append(f"Catalogue: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?")
 
     # Step 3: Validate ISBNs (if ISBN column exists)
     if 'ISBN' in df_clean.columns:
@@ -178,11 +196,13 @@ def process_catalogue_data():
         df_clean['ISBN_valid'] = df_clean['ISBN'].apply(validate_isbn)
         invalid_count = (~df_clean['ISBN_valid']).sum()
         print(f"  - Found {invalid_count:,} invalid ISBNs")
+        if invalid_count == 0 and len(df_clean) > 0:
+            warnings.append(f"Catalogue: validate_isbn() returned valid for all {len(df_clean):,} rows - is it implemented?")
 
     # Step 4: Save cleaned data
     print("\n[4/4] Saving cleaned data...")
     filepath = save_to_silver(df_clean, 'catalogue_clean.csv')
-    print(f"  ✓ Saved to: {filepath}")
+    print(f"  [OK] Saved to: {filepath}")
 
     print_dataframe_info(df_clean, "Cleaned data")
 
@@ -229,7 +249,7 @@ def process_feedback_data():
     # Step 2: Save
     print("\n[2/2] Saving processed feedback...")
     filepath = save_to_silver(df_summary, "feedback_summary.csv")
-    print(f"  ✓ Saved to: {filepath}")
+    print(f"  [OK] Saved to: {filepath}")
 
     print(f"  - Processed {feedback_count} feedback entries")
 
@@ -256,12 +276,13 @@ def run_pipeline():
     # Track pipeline metrics
     start_time = datetime.now()
     results = {}
+    warnings = []
 
     try:
         # Process each data source
-        results['circulation'] = process_circulation_data()
-        results['events'] = process_events_data()
-        results['catalogue'] = process_catalogue_data()
+        results['circulation'] = process_circulation_data(warnings)
+        results['events'] = process_events_data(warnings)
+        results['catalogue'] = process_catalogue_data(warnings)
         results['feedback'] = process_feedback_data()
 
         # Calculate pipeline statistics
@@ -270,7 +291,7 @@ def run_pipeline():
 
         # Print final summary
         print_section_header("PIPELINE SUMMARY")
-        print("\n✓ Pipeline completed successfully!")
+        print("\n[OK] Pipeline completed successfully!")
         print(f"  - Duration: {duration:.2f} seconds")
         print(f"  - Files processed: {len(results)}")
         print(f"  - Output directory: {SILVER_DIR}")
@@ -278,6 +299,11 @@ def run_pipeline():
         print("\nCleaned files created:")
         for file in SILVER_DIR.glob("*.csv"):
             print(f"  - {file.name}")
+
+        if warnings:
+            print(f"\n  [!] {len(warnings)} warning(s) - review before submitting:")
+            for w in warnings:
+                print(f"    [!] {w}")
 
         print("\n" + "=" * 60)
         print("  Next steps:")
@@ -289,7 +315,7 @@ def run_pipeline():
         return results
 
     except Exception as e:
-        print(f"\n❌ Pipeline failed with error: {str(e)}")
+        print(f"\n[ERROR] Pipeline failed with error: {str(e)}")
         print("  - Check your data files exist")
         print("  - Check your functions are working")
         raise
