@@ -88,17 +88,18 @@ def process_circulation_data(warnings):
     2. Remove duplicates
     3. Handle missing values
     4. Standardize dates
-    5. Save to silver
+    5. Clean ISBNs
+    6. Save to silver
     """
     print_section_header("Processing Circulation Data")
 
     # Step 1: Load raw data
-    print("\n[1/5] Loading raw data...")
+    print("\n[1/6] Loading raw data...")
     df = load_csv('data/circulation_data.csv')
     print_dataframe_info(df, "Raw data")
 
     # Step 2: Remove duplicates
-    print("\n[2/5] Removing duplicates...")
+    print("\n[2/6] Removing duplicates...")
     input_dupes = df.duplicated(subset=['transaction_id']).sum()
     df_clean = remove_duplicates(df, subset=['transaction_id'])
     rows_removed = len(df) - len(df_clean)
@@ -107,7 +108,7 @@ def process_circulation_data(warnings):
         warnings.append(f"Circulation: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?")
 
     # Step 3: Handle missing values
-    print("\n[3/5] Handling missing values...")
+    print("\n[3/6] Handling missing values...")
     input_missing = df_clean.isnull().sum().sum()
     df_clean = handle_missing_values(df_clean, strategy='drop')
     output_missing = df_clean.isnull().sum().sum()
@@ -116,11 +117,22 @@ def process_circulation_data(warnings):
         warnings.append(f"Circulation: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?")
 
     # Step 4: Standardize dates
-    print("\n[4/5] Standardizing dates...")
+    print("\n[4/6] Standardizing dates...")
     df_clean = standardize_dates(df_clean, date_columns=['checkout_date', 'return_date'])
 
-    # Step 5: Save cleaned data
-    print("\n[5/5] Saving cleaned data...")
+    # Step 5: Clean ISBNs (if isbn column exists)
+    if 'isbn' in df_clean.columns:
+        print("\n[5/6] Cleaning ISBNs...")
+        original_isbns = df_clean['isbn']
+        df_clean['ISBN_Clean'] = df_clean['isbn'].apply(validate_isbn)
+        invalid_count = df_clean['ISBN_Clean'].isnull().sum()
+        unchanged_count = (df_clean['ISBN_Clean'] == original_isbns).sum()
+        print(f"  - Found {invalid_count:,} invalid ISBNs")
+        if unchanged_count == len(df_clean) and len(df_clean) > 0:
+            warnings.append(f"Circulation: validate_isbn() returned input unchanged for all {len(df_clean):,} rows - is it implemented?")
+
+    # Step 6: Save cleaned data
+    print("\n[6/6] Saving cleaned data...")
     filepath = save_to_silver(df_clean, 'circulation_clean.csv')
     print(f"  [OK] Saved to: {filepath}")
     print_dataframe_info(df_clean, "Cleaned data")
@@ -170,7 +182,7 @@ def process_catalogue_data(warnings):
     Steps:
     1. Load from bronze
     2. Remove duplicates
-    3. Validate ISBNs
+    3. Clean ISBNs
     4. Handle missing values
     5. Save to silver
     """
@@ -190,14 +202,16 @@ def process_catalogue_data(warnings):
     if input_dupes > 0 and df_clean.duplicated(subset=['ISBN']).sum() == input_dupes:
         warnings.append(f"Catalogue: remove_duplicates() left {input_dupes} duplicates unchanged - is it implemented?")
 
-    # Step 3: Validate ISBNs (if ISBN column exists)
+    # Step 3: Clean ISBNs (if ISBN column exists)
     if 'ISBN' in df_clean.columns:
-        print("\n[3/4] Validating ISBNs...")
-        df_clean['ISBN_valid'] = df_clean['ISBN'].apply(validate_isbn)
-        invalid_count = (~df_clean['ISBN_valid']).sum()
+        print("\n[3/4] Cleaning ISBNs...")
+        original_isbns = df_clean['ISBN']
+        df_clean['ISBN_Clean'] = df_clean['ISBN'].apply(validate_isbn)
+        invalid_count = df_clean['ISBN_Clean'].isnull().sum()
+        unchanged_count = (df_clean['ISBN_Clean'] == original_isbns).sum()
         print(f"  - Found {invalid_count:,} invalid ISBNs")
-        if invalid_count == 0 and len(df_clean) > 0:
-            warnings.append(f"Catalogue: validate_isbn() returned valid for all {len(df_clean):,} rows - is it implemented?")
+        if unchanged_count == len(df_clean) and len(df_clean) > 0:
+            warnings.append(f"Catalogue: validate_isbn() returned input unchanged for all {len(df_clean):,} rows - is it implemented?")
 
     # Step 4: Save cleaned data
     print("\n[4/4] Saving cleaned data...")

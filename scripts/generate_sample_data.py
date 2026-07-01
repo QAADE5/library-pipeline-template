@@ -32,8 +32,12 @@ np.random.seed(42)
 # ============================================
 
 
-def generate_circulation_data(n):
-    """Generate circulation data with intentional quality issues."""
+def generate_circulation_data(n, isbn_pool):
+    """Generate circulation data with intentional quality issues.
+
+    isbn values are drawn from isbn_pool (the catalogue's ISBNs) so that
+    circulation and catalogue can be joined on ISBN after cleaning.
+    """
 
     data = []
 
@@ -41,7 +45,7 @@ def generate_circulation_data(n):
         record = {
             'transaction_id': f'TXN{i:06d}',
             'member_id': f'M{random.randint(10000, 99999)}',
-            'isbn': fake.isbn13() if random.random() > 0.05 else None,  # 5% missing
+            'isbn': random.choice(isbn_pool) if random.random() > 0.05 else None,  # 5% missing
             'checkout_date': fake.date_between(start_date='-2y', end_date='today'),
             'return_date': None,  # Will fill below
             'branch_id': f'BR{random.randint(1, 15):03d}'
@@ -226,8 +230,12 @@ def generate_feedback_data(n):
 # ============================================
 
 
-def generate_catalogue_data(n):
-    """Generate book catalogue with Excel-specific issues."""
+def generate_catalogue_data(n, isbn_pool):
+    """Generate book catalogue with Excel-specific issues.
+
+    isbn_pool supplies one ISBN per row (catalogue is the source of ISBNs
+    that circulation later draws from).
+    """
 
     genres = ['Fiction', 'Non-Fiction', 'Children', 'Young Adult', 'Reference']
 
@@ -235,7 +243,7 @@ def generate_catalogue_data(n):
 
     for i in range(n):
         record = {
-            'ISBN': fake.isbn13(),
+            'ISBN': isbn_pool[i],
             'Title': fake.catch_phrase(),  # Not real book titles, but works for demo
             'Author': fake.name(),
             'Genre': random.choice(genres),
@@ -252,6 +260,7 @@ def generate_catalogue_data(n):
     # INJECT EXCEL-SPECIFIC ISSUES
 
     # 1. Some ISBNs stored as numbers (Excel removes leading zeros)
+    df['ISBN'] = df['ISBN'].astype(object)  # allow mixed str/int values below
     numeric_isbns = random.sample(range(len(df)), int(len(df) * 0.1))
     for idx in numeric_isbns:
         if df.loc[idx, 'ISBN']:
@@ -275,9 +284,14 @@ def generate_all_sample_data(output_dir='data'):
 
     print("Generating sample data...")
 
+    # Shared pool of check-digit-valid ISBN-13s - catalogue assigns one per
+    # book, circulation samples from the same pool so the two can be joined
+    # on ISBN after cleaning.
+    isbn_pool = [fake.isbn13() for _ in range(CATALOGUE)]
+
     # 1. Circulation CSV
     print(f"  - Generating circulation_data.csv ({CIRCULATION} rows)...")
-    circ_df = generate_circulation_data(CIRCULATION)
+    circ_df = generate_circulation_data(CIRCULATION, isbn_pool)
     circ_df.to_csv(f'{output_dir}/circulation_data.csv', index=False)
     print(f"    ✓ Created: {len(circ_df)} rows")
     print("    - Duplicates: ~2%")
@@ -301,7 +315,7 @@ def generate_all_sample_data(output_dir='data'):
 
     # 4. Catalogue Excel
     print("  - Generating catalogue.xlsx...")
-    catalogue_df = generate_catalogue_data(CATALOGUE)
+    catalogue_df = generate_catalogue_data(CATALOGUE, isbn_pool)
 
     # Create Excel with some messiness
     with pd.ExcelWriter(f'{output_dir}/catalogue.xlsx', engine='openpyxl') as writer:
