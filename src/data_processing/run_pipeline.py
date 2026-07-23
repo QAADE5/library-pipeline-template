@@ -27,7 +27,7 @@ from data_processing.ingestion import load_csv, load_json, load_excel
 from data_processing.cleaning import (
     remove_duplicates,
     handle_missing_values,
-    standardize_dates,
+    standardise_dates,
 )
 from data_processing.validation import validate_isbn
 
@@ -87,7 +87,7 @@ def process_circulation_data(warnings):
     1. Load from bronze
     2. Remove duplicates
     3. Handle missing values
-    4. Standardize dates
+    4. Standardise dates
     5. Clean ISBNs
     6. Save to silver
     """
@@ -116,9 +116,9 @@ def process_circulation_data(warnings):
     if input_missing > 0 and output_missing == input_missing:
         warnings.append(f"Circulation: handle_missing_values() left {input_missing:,} missing values unchanged - is it implemented?")
 
-    # Step 4: Standardize dates
-    print("\n[4/6] Standardizing dates...")
-    df_clean = standardize_dates(df_clean, date_columns=['checkout_date', 'return_date'])
+    # Step 4: Standardise dates
+    print("\n[4/6] Standardising dates...")
+    df_clean = standardise_dates(df_clean, date_columns=['checkout_date', 'return_date'])
 
     # Step 5: Clean ISBNs (if isbn column exists)
     if 'isbn' in df_clean.columns:

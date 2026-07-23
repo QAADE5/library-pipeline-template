@@ -1,7 +1,7 @@
 """Data cleaning functions for library pipeline.
 
 The cleaning module
-This module contains functions for cleaning and standardizing data.
+This module contains functions for cleaning and standardising data.
 All functions return new DataFrames without modifying the input.
 """
 
@@ -26,7 +26,7 @@ def handle_missing_values(df, strategy='drop', fill_value=None, columns=None):
     return df
 
 
-def standardize_dates(df, date_columns, date_format='%Y-%m-%d'):
-    """Standardize date columns to consistent format."""
+def standardise_dates(df, date_columns, date_format='%Y-%m-%d'):
+    """Standardise date columns to consistent format."""
     df = df.copy()
     return df

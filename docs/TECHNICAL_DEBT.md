@@ -68,7 +68,7 @@ Technical debt refers to:
 
 **Example**:
 1. **Long functions**
-   - **Location**: `cleaning.py` - `standardize_dates()` is 50 lines
+   - **Location**: `cleaning.py` - `standardise_dates()` is 50 lines
    - **Problem**: Hard to test individual parts, difficult to maintain
    - **Solution**: Break into smaller functions
    - **Effort**: 1 hour

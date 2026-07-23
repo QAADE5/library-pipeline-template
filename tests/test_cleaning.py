@@ -1,13 +1,13 @@
 """Tests for cleaning.py.
 
 TODO: Implement these tests once remove_duplicates, handle_missing_values,
-and standardize_dates are implemented in src/data_processing/cleaning.py.
+and standardise_dates are implemented in src/data_processing/cleaning.py.
 """
 
 from data_processing.cleaning import (
     remove_duplicates,
     handle_missing_values,
-    standardize_dates,
+    standardise_dates,
 )
 
 
@@ -21,6 +21,6 @@ def test_handle_missing_values():
     pass
 
 
-def test_standardize_dates():
-    """Test standardize_dates()."""
+def test_standardise_dates():
+    """Test standardise_dates()."""
     pass
