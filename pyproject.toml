@@ -20,7 +20,12 @@ where = ["src"]
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-extend-exclude = ["venv", ".venv", "build", "dist"]
+extend-exclude = ["venv", ".venv", "build", "dist", "notebooks"]
+
+[tool.ruff.lint]
+# Codes outside ruff's default set that some local setups (editor extensions,
+# user-level ruff configs) enable but that aren't part of what this course teaches.
+ignore = ["RUF010", "DTZ005", "I001"]
 
 [tool.pytest.ini_options]
 addopts = "-v"
