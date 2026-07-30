@@ -8,7 +8,7 @@
 ![Last Commit](https://img.shields.io/github/last-commit/YOUR_USERNAME/YOUR_REPO)
 ![CI Pipeline Badge](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/ci.yml/badge.svg)
 
-<mark>*Replace `YOUR_USERNAME` and `YOUR_REPO` with your details*</mark>
+<mark>*Replace the placeholder text above with your GitHub username and repo name*</mark>
 
 ## Project Overview
 [TODO: Describe the library's data quality problem]
@@ -32,8 +32,8 @@ git config --global user.name "Your Name"
 ### Local Development
 ```bash
 # Clone this repository
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO
-cd YOUR_REPO
+git clone <repo url>
+cd <repo_name>
 
 # Confirm the Python 3 version
 python --version
