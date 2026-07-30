@@ -6,7 +6,10 @@ nav:
   - Overview: index.md
   - Architecture:
     - Pipeline Design: architecture/design-pipeline.md
-    - ADR: architecture/adr.md
+    - ADR: architecture/ADR-001.md
+  - Project Tasks: PROJECT_TASKS.md
+  - Security: SECURITY.md
+  - Technical Debt: TECHNICAL_DEBT.md
 
 # Theme
 theme:
@@ -18,6 +21,9 @@ theme:
       logo: material/database
     static_templates:
       - 404.html
+    palette:
+      primary: indigo
+      accent: indigo
 
 # Extensions
 markdown_extensions:
