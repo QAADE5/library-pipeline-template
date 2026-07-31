@@ -13,14 +13,14 @@ from data_processing.cleaning import (
 
 def test_remove_duplicates():
     """Test remove_duplicates()."""
-    pass
+    remove_duplicates
 
 
 def test_handle_missing_values():
     """Test handle_missing_values()."""
-    pass
+    handle_missing_values
 
 
 def test_standardise_dates():
     """Test standardise_dates()."""
-    pass
+    standardise_dates

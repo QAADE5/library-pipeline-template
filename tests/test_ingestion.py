@@ -9,14 +9,14 @@ from data_processing.ingestion import load_csv, load_json, load_excel
 
 def test_load_csv():
     """Test load_csv()."""
-    pass
+    load_csv
 
 
 def test_load_json():
     """Test load_json()."""
-    pass
+    load_json
 
 
 def test_load_excel():
     """Test load_excel()."""
-    pass
+    load_excel

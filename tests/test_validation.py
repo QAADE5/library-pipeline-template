@@ -9,4 +9,4 @@ from data_processing.validation import validate_isbn
 
 def test_validate_isbn():
     """Test validate_isbn()."""
-    pass
+    validate_isbn
