@@ -45,13 +45,13 @@ pip install -r requirements_dev.txt
 pip install -e .
 
 # Run tests
-pytest
+python -m pytest
 
 # Run tests with a coverage report
-pytest --cov=src --cov-report=term-missing
+python -m pytest --cov=src --cov-report=term-missing
 
 # Run tests with an HTML coverage report
-pytest --cov=src --cov-report=html
+python -m pytest --cov=src --cov-report=html
 
 # Run the pipeline
 python -m data_processing.run_pipeline
