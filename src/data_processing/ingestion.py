@@ -5,12 +5,8 @@ TODO: Complete these functions for the library project.
 
 import json
 
-import logging
 import pandas as pd
 from pathlib import Path
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 def load_csv(filepath):
@@ -22,7 +18,7 @@ def load_csv(filepath):
     Returns:
         DataFrame with loaded data
 
-    TODO: Add error handling and logging
+    TODO: Add error handling
     """
     return pd.read_csv(filepath)
 
@@ -58,7 +54,6 @@ def load_excel(filepath, sheet_name=0, **kwargs):
         FileNotFoundError: If file doesn't exist
         ValueError: If the sheet doesn't exist or file is invalid
         ImportError: If the required Excel engine isn't installed
-        Exception: For other read errors
 
     Example:
         >>> df = load_excel('../data/catalogue.xlsx', sheet_name='Catalogue')
@@ -68,28 +63,6 @@ def load_excel(filepath, sheet_name=0, **kwargs):
 
     # Check file exists
     if not filepath.exists():
-        logger.error(f"Excel File not found: {filepath}")
         raise FileNotFoundError(f"Excel File not found: {filepath}")
 
-    try:
-        logger.info(f"Loading Excel from {filepath} (sheet_name={sheet_name})")
-        df = pd.read_excel(filepath, sheet_name=sheet_name, **kwargs)
-
-        if isinstance(df, dict):
-            total_rows = sum(len(v) for v in df.values())
-            line = f"Successfully loaded {len(df)} sheets, total {total_rows} rows from {filepath}"
-            logger.info(line)
-        else:
-            logger.info(f"Successfully loaded {len(df)} rows from {filepath}")
-
-        return df
-
-    except ValueError as e:
-        logger.error(f"Value error loading Excel {filepath}: {e}")
-        raise
-    except ImportError as e:
-        logger.error(f"Missing Excel engine for {filepath}: {e}")
-        raise
-    except Exception as e:
-        logger.error(f"Error loading Excel {filepath}: {e}")
-        raise
+    return pd.read_excel(filepath, sheet_name=sheet_name, **kwargs)

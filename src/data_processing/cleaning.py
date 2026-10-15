@@ -9,10 +9,6 @@ All functions return new DataFrames without modifying the input.
 # import pandas as pd
 # from typing import List, Optional
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 
 def remove_duplicates(df, subset=None):
     """Remove duplicate rows from DataFrame."""
